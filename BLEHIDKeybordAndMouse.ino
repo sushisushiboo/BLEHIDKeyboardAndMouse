@@ -31,9 +31,7 @@ void sendReport(KbdRptParser::KeyReport *report)
 USB Usb;
 USBHub Hub(&Usb);
 
-HIDBoot<USB_HID_PROTOCOL_KEYBOARD | USB_HID_PROTOCOL_MOUSE> HidComposite(&Usb);
-HIDBoot<USB_HID_PROTOCOL_KEYBOARD> HidKeyboard(&Usb);
-HIDBoot<USB_HID_PROTOCOL_MOUSE> HidMouse(&Usb);
+HIDBoot<USB_HID_PROTOCOL_KEYBOARD | USB_HID_PROTOCOL_MOUSE> HidComposite(&Usb, true);
 
 KbdRptParser KbdPrs;
 MouseRptParser MousePrs;
@@ -46,6 +44,15 @@ MouseRptParser MousePrs;
 void mouseMove(int8_t dx, int8_t dy)
 {
     blehid.mouseMove(dx, dy);
+}
+
+/**
+ * @brief スクロールの通知
+ * @param dh H移動量
+ */
+void mouseScroll(int8_t dh)
+{
+    blehid.mouseScroll(dh);
 }
 
 /**
@@ -107,13 +114,15 @@ void setup()
     delay(200);
 
     // USBデバイスのイベント処理の設定
+#if 1
     HidComposite.SetReportParser(0, &KbdPrs);
     HidComposite.SetReportParser(1, &MousePrs);
-    HidKeyboard.SetReportParser(0, &KbdPrs);
-    HidMouse.SetReportParser(0, &MousePrs);
+#else
+    HidUniversal.SetReportParser(0, &UnivPrs);
+#endif
 
     // イベント処理コールバックの設定
-    MousePrs.setCallback(mouseMove, mouseButtonRight, mouseButtonLeft, mouseButtonMiddle);
+    MousePrs.setCallback(mouseMove, mouseScroll, mouseButtonRight, mouseButtonLeft, mouseButtonMiddle);
     KbdPrs.setCallback(sendReport);
 
     // BLEの初期設定

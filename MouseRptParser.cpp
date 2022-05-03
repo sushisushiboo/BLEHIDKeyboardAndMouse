@@ -13,6 +13,15 @@ void MouseRptParser::OnMouseMove(MOUSEINFO *mi)
     (*this->callbackMove)(mi->dX, mi->dY);
 #endif
 };
+void MouseRptParser::OnScroll(MOUSEINFO *mi)
+{
+#ifdef DEBUG_PRINT
+    Serial.print("dH=");
+    Serial.println(mi->dH, DEC);
+#else
+    (*this->callbackScroll)(mi->dH);
+#endif
+};
 void MouseRptParser::OnLeftButtonUp(MOUSEINFO *mi)
 {
 #ifdef DEBUG_PRINT
@@ -63,11 +72,13 @@ void MouseRptParser::OnMiddleButtonDown(MOUSEINFO *mi)
 };
 
 void MouseRptParser::setCallback(void (*move)(int8_t, int8_t),
+                                 void (*scroll)(int8_t),
                                  void (*buttonRight)(bool),
                                  void (*buttonLeft)(bool),
                                  void (*buttonMiddle)(bool))
 {
     this->callbackMove = move;
+    this->callbackScroll = scroll;
     this->callbackButtonRight = buttonRight;
     this->callbackButtonLeft = buttonLeft;
     this->callbackButtonMiddle = buttonMiddle;
